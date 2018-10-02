@@ -27,32 +27,23 @@ public class UserMealsUtil {
     }
 
     public static List<UserMealWithExceed> getFilteredWithExceededByCycle(List<UserMeal> mealList, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
+        Map<LocalDate, Integer> calPerDayMap = new HashMap<>();
+        mealList.forEach(userMeal -> calPerDayMap.merge(userMeal.getDate(), userMeal.getCalories(), Integer::sum));
         List<UserMealWithExceed> filteredList = new ArrayList<>();
         mealList.forEach(userMeal -> {
             if (isBetween(userMeal.getTime(), startTime, endTime)) {
-                filteredList.add(new UserMealWithExceed(userMeal.getDateTime(), userMeal.getDescription(), userMeal.getCalories(), getCalPerDayMap(mealList).get(userMeal.getDate()) > caloriesPerDay));
+                filteredList.add(new UserMealWithExceed(userMeal.getDateTime(), userMeal.getDescription(), userMeal.getCalories(), calPerDayMap.get(userMeal.getDate()) > caloriesPerDay));
             }
         });
         return filteredList;
     }
 
     public static List<UserMealWithExceed> getFilteredWithExceededByStream(List<UserMeal> mealList, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
-        Map<LocalDate, Integer> calPerDayMap = new HashMap<>();
+        Map<LocalDate, Integer> calPerDayMap = mealList.stream()
+                .collect(Collectors.groupingBy(UserMeal::getDate, Collectors.summingInt(UserMeal::getCalories)));
         return mealList.stream()
-                .map(userMeal -> {
-                    calPerDayMap.merge(userMeal.getDate(), userMeal.getCalories(), Integer::sum);
-                    return userMeal;
-                })
-                .collect(Collectors.toList())
-                .stream()
                 .filter(userMeal -> isBetween(userMeal.getTime(), startTime, endTime))
                 .map(userMeal -> new UserMealWithExceed(userMeal.getDateTime(), userMeal.getDescription(), userMeal.getCalories(), calPerDayMap.get(userMeal.getDate()) > caloriesPerDay))
                 .collect(Collectors.toList());
-    }
-
-    public static Map<LocalDate, Integer> getCalPerDayMap(List<UserMeal> mealList) {
-        Map<LocalDate, Integer> calPerDayMap = new HashMap<>();
-        mealList.forEach(userMeal -> calPerDayMap.merge(userMeal.getDate(), userMeal.getCalories(), Integer::sum));
-        return calPerDayMap;
     }
 }
