@@ -32,7 +32,10 @@ public class UserMealsUtil {
         List<UserMealWithExceed> filteredList = new ArrayList<>();
         mealList.forEach(userMeal -> {
             if (isBetween(userMeal.getTime(), startTime, endTime)) {
-                filteredList.add(new UserMealWithExceed(userMeal.getDateTime(), userMeal.getDescription(), userMeal.getCalories(), calPerDayMap.get(userMeal.getDate()) > caloriesPerDay));
+                filteredList.add(new UserMealWithExceed(userMeal.getDateTime(),
+                        userMeal.getDescription(),
+                        userMeal.getCalories(),
+                        calPerDayMap.get(userMeal.getDate()) > caloriesPerDay));
             }
         });
         return filteredList;
@@ -43,7 +46,10 @@ public class UserMealsUtil {
                 .collect(Collectors.groupingBy(UserMeal::getDate, Collectors.summingInt(UserMeal::getCalories)));
         return mealList.stream()
                 .filter(userMeal -> isBetween(userMeal.getTime(), startTime, endTime))
-                .map(userMeal -> new UserMealWithExceed(userMeal.getDateTime(), userMeal.getDescription(), userMeal.getCalories(), calPerDayMap.get(userMeal.getDate()) > caloriesPerDay))
+                .map(userMeal -> new UserMealWithExceed(userMeal.getDateTime(),
+                        userMeal.getDescription(),
+                        userMeal.getCalories(),
+                        calPerDayMap.get(userMeal.getDate()) > caloriesPerDay))
                 .collect(Collectors.toList());
     }
 }
