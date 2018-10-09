@@ -13,29 +13,27 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class InMemoryMealRepositoryImpl implements MealRepository {
 
-    private static Map<Integer, Meal> meals = new ConcurrentHashMap<>();
-    private static AtomicInteger counter = new AtomicInteger(0);
+    private Map<Integer, Meal> meals = new ConcurrentHashMap<>();
+    private AtomicInteger counter = new AtomicInteger(0);
 
-    static {
+    {
         getMealsList().forEach(meal -> meals.put(meal.getId(), meal));
     }
 
     @Override
-    public void add(Meal meal) {
+    public Meal save(Meal meal) {
         if (meal.getId() == null) {
             meal.setId(counter.incrementAndGet());
+            meals.put(meal.getId(), meal);
+        } else {
+            meals.computeIfPresent(meal.getId(), (key, oldValue) -> meal);
         }
-        meals.put(meal.getId(), meal);
+        return meal;
     }
 
     @Override
     public void delete(int id) {
         meals.remove(id);
-    }
-
-    @Override
-    public void update(Meal meal) {
-        meals.put(meal.getId(), meal);
     }
 
     @Override
@@ -45,12 +43,10 @@ public class InMemoryMealRepositoryImpl implements MealRepository {
 
     @Override
     public List<Meal> getAll() {
-        List<Meal> list = new ArrayList<>();
-        list.addAll(meals.values());
-        return list;
+        return new ArrayList(meals.values());
     }
 
-    public static List<Meal> getMealsList() {
+    public List<Meal> getMealsList() {
         return Arrays.asList(
                 new Meal(counter.incrementAndGet(), LocalDateTime.of(2015, Month.MAY, 30, 10, 0), "Завтрак", 500),
                 new Meal(counter.incrementAndGet(), LocalDateTime.of(2015, Month.MAY, 30, 13, 0), "Обед", 1000),
