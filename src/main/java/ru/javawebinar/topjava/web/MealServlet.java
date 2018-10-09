@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
@@ -41,6 +42,13 @@ public class MealServlet extends HttpServlet {
                 repository.delete(Integer.parseInt(id));
                 req.setAttribute("meals", getFilteredWithExceeded(repository.getAll(), LocalTime.MIN, LocalTime.MAX, CALORIES_PER_DAY));
                 resp.sendRedirect("meals");
+            } else {
+                resp.setContentType("text/html");
+                PrintWriter pw = resp.getWriter();
+                pw.println("<html><body>");
+                pw.println("Invalid ID value!");
+                pw.println("</body></html>");
+                pw.close();
             }
         } else if ("add".equals(action)) {
             req.getRequestDispatcher(INSERT_OR_EDIT).forward(req, resp);
