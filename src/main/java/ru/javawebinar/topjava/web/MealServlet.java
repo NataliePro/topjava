@@ -24,7 +24,6 @@ public class MealServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        super.init();
         this.repository = new InMemoryMealRepositoryImpl();
     }
 
@@ -32,12 +31,13 @@ public class MealServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         String action = req.getParameter("action");
-        String id = req.getParameter("id");
-        if (id != null && !id.isEmpty()) {
-            if ("edit".equals(action)) {
+
+        if ("edit".equals(action) || "delete".equals(action)) {
+            String id = req.getParameter("id");
+            if ("edit".equals(action) && id != null && !id.isEmpty()) {
                 req.setAttribute("meal", repository.get(Integer.parseInt(id)));
                 req.getRequestDispatcher(INSERT_OR_EDIT).forward(req, resp);
-            } else if ("delete".equals(action)) {
+            } else if ("delete".equals(action) && id != null && !id.isEmpty()) {
                 repository.delete(Integer.parseInt(id));
                 req.setAttribute("meals", getFilteredWithExceeded(repository.getAll(), LocalTime.MIN, LocalTime.MAX, CALORIES_PER_DAY));
                 resp.sendRedirect("meals");
@@ -57,15 +57,7 @@ public class MealServlet extends HttpServlet {
         String dateTime = req.getParameter("dateTime");
         String description = req.getParameter("description");
         String calories = req.getParameter("calories");
-        if (!id.isEmpty()) {
-            Meal mealUpdated = repository.get(Integer.parseInt(id));
-            mealUpdated.setDateTime(LocalDateTime.parse(dateTime, DATE_TIME_FORMATTER));
-            mealUpdated.setDescription(description);
-            mealUpdated.setCalories(Integer.parseInt(calories));
-            repository.save(mealUpdated);
-        } else {
-            repository.save(new Meal(LocalDateTime.parse(dateTime, DATE_TIME_FORMATTER), description, Integer.parseInt(calories)));
-        }
+        repository.save(new Meal(!id.isEmpty() ? Integer.parseInt(id) : null, LocalDateTime.parse(dateTime, DATE_TIME_FORMATTER), description, Integer.parseInt(calories)));
         req.setAttribute("meals", getFilteredWithExceeded(repository.getAll(), LocalTime.MIN, LocalTime.MAX, CALORIES_PER_DAY));
         req.getRequestDispatcher(LIST).forward(req, resp);
     }

@@ -25,10 +25,10 @@ public class InMemoryMealRepositoryImpl implements MealRepository {
         if (meal.getId() == null) {
             meal.setId(counter.incrementAndGet());
             meals.put(meal.getId(), meal);
+            return meal;
         } else {
-            meals.computeIfPresent(meal.getId(), (key, oldValue) -> meal);
+            return meals.computeIfPresent(meal.getId(), (key, oldValue) -> meal);
         }
-        return meal;
     }
 
     @Override
