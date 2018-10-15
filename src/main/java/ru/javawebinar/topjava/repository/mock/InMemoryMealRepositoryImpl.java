@@ -11,8 +11,10 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static ru.javawebinar.topjava.util.DateTimeUtil.isBetween;
+import static ru.javawebinar.topjava.util.MealsUtil.getSortedMealsStreamFromMap;
 
 @Repository
 public class InMemoryMealRepositoryImpl implements MealRepository {
@@ -70,22 +72,22 @@ public class InMemoryMealRepositoryImpl implements MealRepository {
 
     @Override
     public List<Meal> getAll(int userId) {
-        Map<Integer, Meal> userMealMap = repository.get(userId);
-        if (userMealMap != null) {
-            return userMealMap.values()
-                    .stream()
-                    .sorted(Comparator.comparing(Meal::getDateTime).reversed())
-                    .collect(Collectors.toList());
+        Stream<Meal> stream = getSortedMealsStreamFromMap(repository, userId);
+        if (stream != null) {
+            return stream.collect(Collectors.toList());
         }
         return Collections.emptyList();
     }
 
     @Override
     public List<Meal> getBetween(int userId, LocalDate startDate, LocalDate endDate, LocalTime startTime, LocalTime endTime) {
-        return getAll(userId).stream()
-                .filter(meal -> isBetween(meal.getDate(), startDate, endDate) && isBetween(meal.getTime(), startTime, endTime))
-                .sorted(Comparator.comparing(Meal::getDateTime).reversed())
-                .collect(Collectors.toList());
+        Stream<Meal> stream = getSortedMealsStreamFromMap(repository, userId);
+        if (stream != null) {
+            return stream
+                    .filter(meal -> isBetween(meal.getDate(), startDate, endDate) && isBetween(meal.getTime(), startTime, endTime))
+                    .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
     }
 }
 
