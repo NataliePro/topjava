@@ -18,7 +18,6 @@ import static ru.javawebinar.topjava.util.DateTimeUtil.isBetween;
 public class InMemoryMealRepositoryImpl implements MealRepository {
     private Map<Integer, Map<Integer, Meal>> repository = new ConcurrentHashMap<>();
     private AtomicInteger counter = new AtomicInteger(0);
-    private Map<Integer, Meal> userMealMap = new ConcurrentHashMap<>();
 
     {
         repository.put(10000, new HashMap<>());
@@ -33,51 +32,45 @@ public class InMemoryMealRepositoryImpl implements MealRepository {
 
     @Override
     public Meal save(Meal meal, int userId) {
-        userMealMap = repository.get(userId);
-        if (userMealMap != null) {
-            if (meal.isNew()) {
-                meal.setId(counter.incrementAndGet());
-                userMealMap.put(meal.getId(), meal);
-                repository.replace(userId, userMealMap);
-                return meal;
-            }
-            Meal userMeal = getUserMealFromMap(userMealMap, meal.getId());
-            if (userMeal == null) {
-                return null;
-            }
-            userMealMap.replace(meal.getId(), meal);
-            repository.replace(userId, userMealMap);
+        Map<Integer, Meal> userMealMap = repository.get(userId);
+        if (userMealMap == null) {
+            userMealMap = new HashMap<>();
+        }
+        if (meal.isNew()) {
+            meal.setId(counter.incrementAndGet());
+            userMealMap.put(meal.getId(), meal);
             return meal;
         }
-        return null;
+        Meal userMeal = userMealMap.get(meal.getId());
+        if (userMeal == null) {
+            return null;
+        }
+        userMealMap.replace(meal.getId(), meal);
+        return meal;
     }
 
     @Override
     public boolean delete(int id, int userId) {
-        userMealMap = repository.get(userId);
+        Map<Integer, Meal> userMealMap = repository.get(userId);
         if (userMealMap != null) {
             Meal removedMeal = userMealMap.remove(id);
-            if (removedMeal == null) {
-                return false;
-            }
-            repository.replace(userId, userMealMap);
-            return true;
+            return !(removedMeal == null);
         }
         return false;
     }
 
     @Override
     public Meal get(int id, int userId) {
-        userMealMap = repository.get(userId);
+        Map<Integer, Meal> userMealMap = repository.get(userId);
         if (userMealMap != null) {
-            return getUserMealFromMap(userMealMap, id);
+            return userMealMap.get(id);
         }
         return null;
     }
 
     @Override
     public List<Meal> getAll(int userId) {
-        userMealMap = repository.get(userId);
+        Map<Integer, Meal> userMealMap = repository.get(userId);
         if (userMealMap != null) {
             return userMealMap.values()
                     .stream()
@@ -93,15 +86,6 @@ public class InMemoryMealRepositoryImpl implements MealRepository {
                 .filter(meal -> isBetween(meal.getDate(), startDate, endDate) && isBetween(meal.getTime(), startTime, endTime))
                 .sorted(Comparator.comparing(Meal::getDateTime).reversed())
                 .collect(Collectors.toList());
-    }
-
-    private Meal getUserMealFromMap(Map<Integer, Meal> userMealMap, int id) {
-        return userMealMap
-                .values()
-                .stream()
-                .filter(meal -> meal.getId() == id)
-                .findFirst()
-                .orElse(null);
     }
 }
 
