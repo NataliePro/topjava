@@ -10,6 +10,8 @@ import ru.javawebinar.topjava.to.MealWithExceed;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static ru.javawebinar.topjava.util.ValidationUtil.assureIdConsistent;
 import static ru.javawebinar.topjava.web.SecurityUtil.*;
@@ -49,7 +51,13 @@ public class MealRestController {
         endDate = endDate == null ? LocalDate.MAX : endDate;
         startTime = startTime == null ? LocalTime.MIN : startTime;
         endTime = endTime == null ? LocalTime.MAX : endTime;
-        return getWithExceeded(service.getAllBetween(authUserId(), startDate, endDate, startTime, endTime), authUserCaloriesPerDay());
+        Map<LocalDate, Integer> calPerDayMap = service.getAll(authUserId())
+                .stream()
+                .collect(Collectors.groupingBy(Meal::getDate, Collectors.summingInt(Meal::getCalories)));
+        return service.getAllBetween(authUserId(), startDate, endDate, startTime, endTime)
+                .stream()
+                .map(meal -> createWithExceed(meal, calPerDayMap.get(meal.getDate()) > authUserCaloriesPerDay()))
+                .collect(Collectors.toList());
     }
 
     public List<MealWithExceed> getAll() {
