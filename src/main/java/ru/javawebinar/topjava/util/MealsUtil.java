@@ -10,7 +10,6 @@ import java.time.Month;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
@@ -51,13 +50,15 @@ public class MealsUtil {
         return new MealWithExceed(meal.getId(), meal.getDateTime(), meal.getDescription(), meal.getCalories(), exceeded);
     }
 
-    public static Stream<Meal> getSortedMealsStreamFromMap(Map<Integer, Map<Integer, Meal>> rep, int userId) {
+    public static List<Meal> getFilteredSortedMealsFromMap(Map<Integer, Map<Integer, Meal>> rep, int userId, Predicate<Meal> filter) {
         Map<Integer, Meal> userMealMap = rep.get(userId);
         if (userMealMap != null) {
             return userMealMap.values()
                     .stream()
-                    .sorted(Comparator.comparing(Meal::getDateTime).reversed());
+                    .filter(filter)
+                    .sorted(Comparator.comparing(Meal::getDateTime).reversed())
+                    .collect(toList());
         }
-        return null;
+        return Collections.emptyList();
     }
 }

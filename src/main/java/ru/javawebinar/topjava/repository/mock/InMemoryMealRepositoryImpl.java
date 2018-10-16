@@ -7,14 +7,14 @@ import ru.javawebinar.topjava.util.MealsUtil;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static ru.javawebinar.topjava.util.DateTimeUtil.isBetween;
-import static ru.javawebinar.topjava.util.MealsUtil.getSortedMealsStreamFromMap;
+import static ru.javawebinar.topjava.util.MealsUtil.getFilteredSortedMealsFromMap;
 
 @Repository
 public class InMemoryMealRepositoryImpl implements MealRepository {
@@ -34,10 +34,7 @@ public class InMemoryMealRepositoryImpl implements MealRepository {
 
     @Override
     public Meal save(Meal meal, int userId) {
-        Map<Integer, Meal> userMealMap = repository.get(userId);
-        if (userMealMap == null) {
-            userMealMap = new HashMap<>();
-        }
+        Map<Integer, Meal> userMealMap = repository.computeIfAbsent(userId, v -> new HashMap<>());
         if (meal.isNew()) {
             meal.setId(counter.incrementAndGet());
             userMealMap.put(meal.getId(), meal);
@@ -72,22 +69,12 @@ public class InMemoryMealRepositoryImpl implements MealRepository {
 
     @Override
     public List<Meal> getAll(int userId) {
-        Stream<Meal> stream = getSortedMealsStreamFromMap(repository, userId);
-        if (stream != null) {
-            return stream.collect(Collectors.toList());
-        }
-        return Collections.emptyList();
+        return getFilteredSortedMealsFromMap(repository, userId, meal -> true);
     }
 
     @Override
     public List<Meal> getBetween(int userId, LocalDate startDate, LocalDate endDate, LocalTime startTime, LocalTime endTime) {
-        Stream<Meal> stream = getSortedMealsStreamFromMap(repository, userId);
-        if (stream != null) {
-            return stream
-                    .filter(meal -> isBetween(meal.getDate(), startDate, endDate) && isBetween(meal.getTime(), startTime, endTime))
-                    .collect(Collectors.toList());
-        }
-        return Collections.emptyList();
+        return getFilteredSortedMealsFromMap(repository, userId, meal -> isBetween(meal.getDate(), startDate, endDate) && isBetween(meal.getTime(), startTime, endTime));
     }
 }
 
