@@ -7,7 +7,6 @@ import ru.javawebinar.topjava.model.Role;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.repository.UserRepository;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -18,10 +17,10 @@ import java.util.stream.Collectors;
 @Repository
 public class InMemoryUserRepositoryImpl implements UserRepository {
     private static final Logger log = LoggerFactory.getLogger(InMemoryUserRepositoryImpl.class);
-    private static final Map<Integer, User> repository = new ConcurrentHashMap<>();
+    private Map<Integer, User> repository = new ConcurrentHashMap<>();
     private static AtomicInteger counter = new AtomicInteger(0);
 
-    static {
+    {
         repository.put(10000, new User(10000, "Admin", "admin@mail.ru", "pass", Role.ROLE_ADMIN));
         repository.put(10001, new User(10001, "User", "user@mail.ru", "pass123", Role.ROLE_USER));
     }
