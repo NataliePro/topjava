@@ -7,7 +7,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -48,17 +51,5 @@ public class MealsUtil {
 
     public static MealWithExceed createWithExceed(Meal meal, boolean exceeded) {
         return new MealWithExceed(meal.getId(), meal.getDateTime(), meal.getDescription(), meal.getCalories(), exceeded);
-    }
-
-    public static List<Meal> getFilteredSortedMealsFromMap(Map<Integer, Map<Integer, Meal>> rep, int userId, Predicate<Meal> filter) {
-        Map<Integer, Meal> userMealMap = rep.get(userId);
-        if (userMealMap != null) {
-            return userMealMap.values()
-                    .stream()
-                    .filter(filter)
-                    .sorted(Comparator.comparing(Meal::getDateTime).reversed())
-                    .collect(toList());
-        }
-        return Collections.emptyList();
     }
 }

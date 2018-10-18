@@ -6,15 +6,13 @@ import ru.javawebinar.topjava.repository.MealRepository;
 import ru.javawebinar.topjava.util.MealsUtil;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 
+import static java.util.stream.Collectors.toList;
 import static ru.javawebinar.topjava.util.DateTimeUtil.isBetween;
-import static ru.javawebinar.topjava.util.MealsUtil.getFilteredSortedMealsFromMap;
 
 @Repository
 public class InMemoryMealRepositoryImpl implements MealRepository {
@@ -73,8 +71,20 @@ public class InMemoryMealRepositoryImpl implements MealRepository {
     }
 
     @Override
-    public List<Meal> getBetween(int userId, LocalDate startDate, LocalDate endDate, LocalTime startTime, LocalTime endTime) {
-        return getFilteredSortedMealsFromMap(repository, userId, meal -> isBetween(meal.getDate(), startDate, endDate) && isBetween(meal.getTime(), startTime, endTime));
+    public List<Meal> getBetween(int userId, LocalDate startDate, LocalDate endDate) {
+        return getFilteredSortedMealsFromMap(repository, userId, meal -> isBetween(meal.getDate(), startDate, endDate));
+    }
+
+    private List<Meal> getFilteredSortedMealsFromMap(Map<Integer, Map<Integer, Meal>> rep, int userId, Predicate<Meal> filter) {
+        Map<Integer, Meal> userMealMap = rep.get(userId);
+        if (userMealMap != null) {
+            return userMealMap.values()
+                    .stream()
+                    .filter(filter)
+                    .sorted(Comparator.comparing(Meal::getDateTime).reversed())
+                    .collect(toList());
+        }
+        return Collections.emptyList();
     }
 }
 

@@ -10,11 +10,8 @@ import ru.javawebinar.topjava.to.MealWithExceed;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
-import static ru.javawebinar.topjava.util.DateTimeUtil.isBetween;
-import static ru.javawebinar.topjava.util.MealsUtil.createWithExceed;
+import static ru.javawebinar.topjava.util.MealsUtil.getFilteredWithExceeded;
 import static ru.javawebinar.topjava.util.MealsUtil.getWithExceeded;
 import static ru.javawebinar.topjava.util.ValidationUtil.assureIdConsistent;
 import static ru.javawebinar.topjava.util.ValidationUtil.checkNew;
@@ -54,15 +51,10 @@ public class MealRestController {
     public List<MealWithExceed> getAllBetween(LocalDate startDate, LocalDate endDate, LocalTime startTime, LocalTime endTime) {
         startDate = startDate == null ? LocalDate.MIN : startDate;
         endDate = endDate == null ? LocalDate.MAX : endDate;
-        List<Meal> meals = service.getAllBetween(authUserId(), startDate, endDate, LocalTime.MIN, LocalTime.MAX);
-        Map<LocalDate, Integer> calPerDayMap = meals
-                .stream()
-                .collect(Collectors.groupingBy(Meal::getDate, Collectors.summingInt(Meal::getCalories)));
-        return meals
-                .stream()
-                .filter(meal -> isBetween(meal.getTime(), startTime == null ? LocalTime.MIN : startTime, endTime == null ? LocalTime.MAX : endTime))
-                .map(meal -> createWithExceed(meal, calPerDayMap.get(meal.getDate()) > authUserCaloriesPerDay()))
-                .collect(Collectors.toList());
+        startTime = startTime == null ? LocalTime.MIN : startTime;
+        endTime = endTime == null ? LocalTime.MAX : endTime;
+        return getFilteredWithExceeded(service.getAllBetween(authUserId(), startDate, endDate),
+                authUserCaloriesPerDay(), startTime, endTime);
     }
 
     public List<MealWithExceed> getAll() {
