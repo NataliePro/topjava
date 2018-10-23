@@ -24,7 +24,7 @@ import static ru.javawebinar.topjava.UserTestData.USER_ID;
 })
 @RunWith(SpringRunner.class)
 @Sql(scripts = "classpath:db/populateDB.sql", config = @SqlConfig(encoding = "UTF-8"))
-public class MealServiceImplTest {
+public class MealServiceTest {
 
     static {
         // Only for postgres driver logging
