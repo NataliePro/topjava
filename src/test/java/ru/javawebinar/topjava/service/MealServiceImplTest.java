@@ -49,8 +49,9 @@ public class MealServiceImplTest {
     @Test
     public void create() {
         Meal created = getUpdated();
-        service.create(created, USER_ID);
+        Meal newMeal = service.create(created, USER_ID);
         assertMatch(service.getAll(USER_ID), created, MEAL6, MEAL5, MEAL4, MEAL3, MEAL2);
+        assertMatch(service.get(created.getId(), USER_ID), newMeal);
     }
 
     @Test
