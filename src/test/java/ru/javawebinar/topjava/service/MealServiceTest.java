@@ -4,8 +4,7 @@ import org.junit.AfterClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.rules.TestRule;
-import org.junit.rules.TestWatcher;
+import org.junit.rules.Stopwatch;
 import org.junit.runner.Description;
 import org.junit.runner.RunWith;
 import org.slf4j.bridge.SLF4JBridgeHandler;
@@ -42,33 +41,24 @@ public class MealServiceTest {
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
-
-    private static long totalTime = 0;
-    private static StringJoiner stringJoiner = new StringJoiner("\n", "\n\nTESTS \n--------------------------\n", "\n--------------------------");
+    private static final String BLUE = "\033[0;34m";
+    private static final String RESET = "\u001B[0m";
+    private static StringJoiner stringJoiner = new StringJoiner("\n", BLUE + "\n\nTESTS \n----------------------------\n", "\n----------------------------" + RESET);
 
     @Rule
-    public final TestRule watchman = new TestWatcher() {
-        private long startTime = 0;
+    public Stopwatch stopwatch = new Stopwatch() {
 
         @Override
-        protected void starting(Description description) {
-            startTime = System.currentTimeMillis();
-        }
-
-        @Override
-        protected void finished(Description description) {
-            long testTime = System.currentTimeMillis() - startTime;
-            String result = "----> " + description.getMethodName() + ": " + testTime + " ms";
-            System.out.println(result);
+        protected void finished(long nanos, Description description) {
+            String result = String.format("%15s: %10d ms", description.getMethodName(), nanos / 1000000);
+            System.out.println(BLUE + result + RESET);
             stringJoiner.add(result);
-            totalTime += testTime;
         }
     };
 
     @AfterClass
     public static void finishTest() {
         System.out.println(stringJoiner);
-        System.out.println("TOTAL TIME: " + totalTime + " ms \n");
     }
 
     @Test
@@ -129,4 +119,6 @@ public class MealServiceTest {
                 LocalDate.of(2015, Month.MAY, 30),
                 LocalDate.of(2015, Month.MAY, 30), USER_ID), MEAL3, MEAL2, MEAL1);
     }
+
+
 }
