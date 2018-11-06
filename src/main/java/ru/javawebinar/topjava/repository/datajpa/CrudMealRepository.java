@@ -25,7 +25,7 @@ public interface CrudMealRepository extends JpaRepository<Meal, Integer> {
     int update(@Param("dateTime") LocalDateTime dateTime, @Param("description") String description,
                @Param("calories") int calories, @Param("id") int id, @Param("userId") int userId);
 
-    @Transactional
+
     @Override
     Meal save(Meal meal);
 
