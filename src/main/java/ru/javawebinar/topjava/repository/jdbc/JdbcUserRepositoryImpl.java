@@ -17,7 +17,6 @@ import ru.javawebinar.topjava.repository.UserRepository;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Repository
 @Transactional(readOnly = true)
@@ -85,22 +84,23 @@ public class JdbcUserRepositoryImpl implements UserRepository {
         return jdbcTemplate.query("SELECT u.id, u.email, u.name, u.registered, u.password, u.enabled, u.calories_per_day," +
                         " r.role  FROM users u LEFT JOIN user_roles r on u.id = r.user_id ORDER BY u.name, u.email",
                 rs -> {
-                    Map<User, Set<Role>> data = new TreeMap<>(Comparator.comparing(User::getName).thenComparing(User::getEmail));
+                    Map<Integer, Set<Role>> data = new HashMap<>();
+                    List<User> users = new ArrayList<>();
                     while (rs.next()) {
                         Role role = Role.valueOf(Role.class, rs.getString("role"));
-                        User user = new User(rs.getInt("id"),
-                                rs.getString("name"),
-                                rs.getString("email"),
-                                rs.getString("password"),
-                                rs.getInt("calories_per_day"),
-                                rs.getBoolean("enabled"),
-                                new Date(),
-                                EnumSet.noneOf(Role.class));
-                        data.computeIfAbsent(user, value -> new HashSet<>()).add(role);
+                        int id = rs.getInt("id");
+                        String name = rs.getString("name");
+                        String email = rs.getString("email");
+                        String password = rs.getString("password");
+                        int cal = rs.getInt("calories_per_day");
+                        boolean enabled = rs.getBoolean("enabled");
+                        data.computeIfAbsent(id, value -> {
+                            users.add(new User(id, name, email, password, cal, enabled, new Date(), EnumSet.noneOf(Role.class)));
+                            return new HashSet<>();
+                        }).add(role);
                     }
-                    data.forEach((user, roleSet) -> user.setRoles(roleSet));
-                    return data.keySet().stream()
-                            .collect(Collectors.toList());
+                    users.forEach(user -> user.setRoles(data.get(user.getId())));
+                    return users;
                 });
     }
 
