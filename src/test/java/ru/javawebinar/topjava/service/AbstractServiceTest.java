@@ -18,7 +18,10 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import ru.javawebinar.topjava.ActiveDbProfileResolver;
 import ru.javawebinar.topjava.TimingRules;
 
+import java.util.Arrays;
+
 import static org.hamcrest.CoreMatchers.instanceOf;
+import static ru.javawebinar.topjava.Profiles.JDBC;
 import static ru.javawebinar.topjava.util.ValidationUtil.getRootCause;
 
 @ContextConfiguration({
@@ -44,6 +47,10 @@ abstract public class AbstractServiceTest {
     static {
         // needed only for java.util.logging (postgres driver)
         SLF4JBridgeHandler.install();
+    }
+
+    protected boolean isJDBC() {
+        return Arrays.asList(environment.getActiveProfiles()).contains(JDBC);
     }
 
     //  Check root cause in JUnit: https://github.com/junit-team/junit4/pull/778

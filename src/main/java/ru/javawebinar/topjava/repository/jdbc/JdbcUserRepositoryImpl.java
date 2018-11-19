@@ -82,10 +82,11 @@ public class JdbcUserRepositoryImpl implements UserRepository {
 
     @Override
     public List<User> getAll() {
+        List<User> users = new ArrayList<>();
         return jdbcTemplate.query("SELECT u.id, u.email, u.name, u.registered, u.password, u.enabled, u.calories_per_day," +
-                        " r.role  FROM users u LEFT JOIN user_roles r on u.id = r.user_id ",
+                        " r.role  FROM users u LEFT JOIN user_roles r on u.id = r.user_id ORDER BY u.name, u.email",
                 rs -> {
-                    Map<User, Set<Role>> data = new HashMap<>();
+                    Map<User, Set<Role>> data = new TreeMap<>(Comparator.comparing(User::getName).thenComparing(User::getEmail));
                     while (rs.next()) {
                         Role role = Role.valueOf(Role.class, rs.getString("role"));
                         User user = new User(rs.getInt("id"),
@@ -100,7 +101,6 @@ public class JdbcUserRepositoryImpl implements UserRepository {
                     }
                     data.forEach((user, roleSet) -> user.setRoles(roleSet));
                     return data.keySet().stream()
-                            .sorted(Comparator.comparing(User::getName).thenComparing(User::getEmail))
                             .collect(Collectors.toList());
                 });
     }
