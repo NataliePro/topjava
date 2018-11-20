@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.javawebinar.topjava.service.MealService;
 
-public class AbstractMealController {
+public abstract class AbstractMealController {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
     protected MealService service;

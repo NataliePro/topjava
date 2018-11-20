@@ -94,8 +94,9 @@ public class JdbcUserRepositoryImpl implements UserRepository {
                         String password = rs.getString("password");
                         int cal = rs.getInt("calories_per_day");
                         boolean enabled = rs.getBoolean("enabled");
+                        Date registered = rs.getDate("registered");
                         data.computeIfAbsent(id, value -> {
-                            users.add(new User(id, name, email, password, cal, enabled, new Date(), EnumSet.noneOf(Role.class)));
+                            users.add(new User(id, name, email, password, cal, enabled, registered, EnumSet.noneOf(Role.class)));
                             return new HashSet<>();
                         }).add(role);
                     }

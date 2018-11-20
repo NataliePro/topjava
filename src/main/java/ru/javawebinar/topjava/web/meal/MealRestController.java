@@ -2,7 +2,6 @@ package ru.javawebinar.topjava.web.meal;
 
 import org.springframework.stereotype.Controller;
 import ru.javawebinar.topjava.model.Meal;
-import ru.javawebinar.topjava.service.MealService;
 import ru.javawebinar.topjava.to.MealTo;
 import ru.javawebinar.topjava.util.DateTimeUtil;
 import ru.javawebinar.topjava.util.MealsUtil;
@@ -18,10 +17,6 @@ import static ru.javawebinar.topjava.util.ValidationUtil.checkNew;
 
 @Controller
 public class MealRestController extends AbstractMealController {
-
-    public MealRestController(MealService service) {
-        super(service);
-    }
 
     public Meal get(int id) {
         int userId = SecurityUtil.authUserId();

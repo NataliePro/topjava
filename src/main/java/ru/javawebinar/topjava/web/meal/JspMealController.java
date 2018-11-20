@@ -4,10 +4,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ru.javawebinar.topjava.model.Meal;
-import ru.javawebinar.topjava.service.MealService;
 import ru.javawebinar.topjava.web.SecurityUtil;
 
-import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -26,25 +24,19 @@ import static ru.javawebinar.topjava.web.SecurityUtil.authUserId;
 @RequestMapping("/meals")
 public class JspMealController extends AbstractMealController {
 
-    public JspMealController(MealService service) {
-        super(service);
-    }
-
     @PostMapping
     public String save(@RequestParam("id") String strId,
                        @RequestParam("dateTime") String strDateTime,
                        @RequestParam("description") String description,
                        @RequestParam("calories") int calories) {
+        int userId = authUserId();
+        Integer id = strId.isEmpty() ? null : Integer.parseInt(strId);
+        Meal meal = new Meal(id, LocalDateTime.parse(strDateTime), description, calories);
         if (strId.isEmpty()) {
-            int userId = authUserId();
-            Meal meal = new Meal(null, LocalDateTime.parse(strDateTime), description, calories);
             checkNew(meal);
             log.info("create {} for user {}", meal, userId);
             service.create(meal, userId);
         } else {
-            int userId = SecurityUtil.authUserId();
-            int id = Integer.parseInt(strId);
-            Meal meal = new Meal(id, LocalDateTime.parse(strDateTime), description, calories);
             assureIdConsistent(meal, id);
             log.info("update {} for user {}", meal, userId);
             service.update(meal, userId);
@@ -60,7 +52,7 @@ public class JspMealController extends AbstractMealController {
 
 
     @GetMapping("/mealForm")
-    public String create(HttpServletRequest request, Model model) {
+    public String create(Model model) {
         model.addAttribute("meal", new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 1000));
         return "mealForm";
     }

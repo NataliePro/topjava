@@ -12,7 +12,7 @@
 <jsp:include page="fragments/bodyHeader.jsp"/>
 <section>
     <h3><a href="${pageContext.request.contextPath}/"><spring:message code="app.home"/></a></h3>
-    <h2><spring:message code="${param.action == 'create' ? 'meal.create' : 'meal.edit'}"/></h2>
+    <h2><spring:message code="${meal.isNew() ? 'meal.create' : 'meal.edit'}"/></h2>
     <hr>
     <jsp:useBean id="meal" type="ru.javawebinar.topjava.model.Meal" scope="request"/>
     <form method="post" action=<%=request.getContextPath() + "/meals"%>>
