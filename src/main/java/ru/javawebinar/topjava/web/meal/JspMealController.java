@@ -4,7 +4,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ru.javawebinar.topjava.model.Meal;
-import ru.javawebinar.topjava.web.SecurityUtil;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -13,12 +12,6 @@ import java.time.temporal.ChronoUnit;
 
 import static ru.javawebinar.topjava.util.DateTimeUtil.MAX_DATE;
 import static ru.javawebinar.topjava.util.DateTimeUtil.MIN_DATE;
-import static ru.javawebinar.topjava.util.MealsUtil.getFilteredWithExcess;
-import static ru.javawebinar.topjava.util.MealsUtil.getWithExcess;
-import static ru.javawebinar.topjava.util.ValidationUtil.assureIdConsistent;
-import static ru.javawebinar.topjava.util.ValidationUtil.checkNew;
-import static ru.javawebinar.topjava.web.SecurityUtil.authUserCaloriesPerDay;
-import static ru.javawebinar.topjava.web.SecurityUtil.authUserId;
 
 @Controller
 @RequestMapping("/meals")
@@ -29,27 +22,21 @@ public class JspMealController extends AbstractMealController {
                        @RequestParam("dateTime") String strDateTime,
                        @RequestParam("description") String description,
                        @RequestParam("calories") int calories) {
-        int userId = authUserId();
         Integer id = strId.isEmpty() ? null : Integer.parseInt(strId);
         Meal meal = new Meal(id, LocalDateTime.parse(strDateTime), description, calories);
         if (strId.isEmpty()) {
-            checkNew(meal);
-            log.info("create {} for user {}", meal, userId);
-            service.create(meal, userId);
+            create(meal);
         } else {
-            assureIdConsistent(meal, id);
-            log.info("update {} for user {}", meal, userId);
-            service.update(meal, userId);
+            update(meal, id);
         }
         return "redirect:/meals";
     }
 
     @GetMapping("/update/{id}")
     public String update(@PathVariable("id") int id, Model model) {
-        model.addAttribute("meal", service.get(id, authUserId()));
+        model.addAttribute("meal", get(id));
         return "mealForm";
     }
-
 
     @GetMapping("/mealForm")
     public String create(Model model) {
@@ -58,18 +45,14 @@ public class JspMealController extends AbstractMealController {
     }
 
     @GetMapping("/delete/{id}")
-    public String delete(@PathVariable("id") int id) {
-        int userId = authUserId();
-        log.info("delete meal {} for user {}", id, userId);
-        service.delete(id, userId);
+    public String deleteMeal(@PathVariable("id") int id) {
+        delete(id);
         return "redirect:/meals";
     }
 
     @GetMapping
     public String getAll(Model model) {
-        int userId = authUserId();
-        log.info("getAll for user {}", userId);
-        model.addAttribute("meals", getWithExcess(service.getAll(userId), authUserCaloriesPerDay()));
+        model.addAttribute("meals", getAll());
         return "meals";
     }
 
@@ -85,12 +68,7 @@ public class JspMealController extends AbstractMealController {
         LocalTime startTime = startTimeStr.isEmpty() ? LocalTime.MIN : LocalTime.parse(startTimeStr);
         LocalTime endTime = endTimeStr.isEmpty() ? LocalTime.MAX : LocalTime.parse(endTimeStr);
 
-        int userId = SecurityUtil.authUserId();
-        log.info("getBetween dates({} - {}) time({} - {}) for user {}", startDate, endDate, startTime, endTime, userId);
-
-        model.addAttribute("meals", getFilteredWithExcess(
-                service.getBetweenDates(startDate, endDate, userId),
-                authUserCaloriesPerDay(), startTime, endTime));
+        model.addAttribute("meals", getBetween(startDate, startTime, endDate, endTime));
         return "meals";
     }
 }
