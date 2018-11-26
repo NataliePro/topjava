@@ -5,7 +5,9 @@ import ru.javawebinar.topjava.model.Meal;
 
 import java.util.List;
 
-import static ru.javawebinar.topjava.MealTestData.*;
+import static ru.javawebinar.topjava.MealTestData.ADMIN_MEAL1;
+import static ru.javawebinar.topjava.MealTestData.MEALS;
+import static ru.javawebinar.topjava.TestUtil.assertMatch;
 
 class JsonUtilTest {
 
@@ -14,7 +16,7 @@ class JsonUtilTest {
         String json = JsonUtil.writeValue(ADMIN_MEAL1);
         System.out.println(json);
         Meal meal = JsonUtil.readValue(json, Meal.class);
-        assertMatch(meal, ADMIN_MEAL1);
+        assertMatch(meal, ADMIN_MEAL1, "user");
     }
 
     @Test
@@ -22,6 +24,6 @@ class JsonUtilTest {
         String json = JsonUtil.writeValue(MEALS);
         System.out.println(json);
         List<Meal> meals = JsonUtil.readValues(json, Meal.class);
-        assertMatch(meals, MEALS);
+        assertMatch(meals, MEALS, "user");
     }
 }
