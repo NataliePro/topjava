@@ -16,7 +16,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static ru.javawebinar.topjava.TestUtil.*;
+import static ru.javawebinar.topjava.TestUtil.contentJson;
+import static ru.javawebinar.topjava.TestUtil.readFromJson;
 import static ru.javawebinar.topjava.UserTestData.*;
 
 class AdminRestControllerTest extends AbstractControllerTest {
@@ -47,7 +48,7 @@ class AdminRestControllerTest extends AbstractControllerTest {
         mockMvc.perform(delete(REST_URL + USER_ID))
                 .andDo(print())
                 .andExpect(status().isNoContent());
-        assertMatch(userService.getAll(), List.of(ADMIN), "registered", "meals");
+        assertMatch(userService.getAll(), ADMIN);
     }
 
     @Test
@@ -60,7 +61,7 @@ class AdminRestControllerTest extends AbstractControllerTest {
                 .content(JsonUtil.writeValue(updated)))
                 .andExpect(status().isNoContent());
 
-        assertMatch(userService.get(USER_ID), updated, "registered", "meals");
+        assertMatch(userService.get(USER_ID), updated);
     }
 
     @Test
@@ -74,8 +75,8 @@ class AdminRestControllerTest extends AbstractControllerTest {
         User returned = readFromJson(action, User.class);
         expected.setId(returned.getId());
 
-        assertMatch(returned, expected, "registered", "meals");
-        assertMatch(userService.getAll(), List.of(ADMIN, expected, USER), "registered", "meals");
+        assertMatch(returned, expected);
+        assertMatch(userService.getAll(), ADMIN, expected, USER);
     }
 
     @Test

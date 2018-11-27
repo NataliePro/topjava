@@ -16,23 +16,23 @@ import java.util.List;
 import static ru.javawebinar.topjava.web.meal.MealRestController.REST_URL;
 
 @RestController
-@RequestMapping(REST_URL)
+@RequestMapping(value = REST_URL, produces = MediaType.APPLICATION_JSON_VALUE)
 public class MealRestController extends AbstractMealController {
     static final String REST_URL = "/rest/meals";
 
     @Override
-    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/{id}")
     public Meal get(@PathVariable("id") int id) {
         return super.get(id);
     }
 
     @Override
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping
     public List<MealTo> getAll() {
         return super.getAll();
     }
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Meal> createWithLocation(@RequestBody Meal meal) {
         Meal created = super.create(meal);
         URI uriOfNewResource = ServletUriComponentsBuilder.fromCurrentContextPath()
@@ -53,7 +53,7 @@ public class MealRestController extends AbstractMealController {
         super.update(meal, id);
     }
 
-    @GetMapping(value = "/filter", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/filter")
     public List<MealTo> getBetween(@RequestParam(value = "startDate", required = false) LocalDate startDate,
                                    @RequestParam(value = "startTime", required = false) LocalTime startTime,
                                    @RequestParam(value = "endDate", required = false) LocalDate endDate,

@@ -2,10 +2,12 @@ package ru.javawebinar.topjava.util;
 
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.to.MealTo;
+import ru.javawebinar.topjava.web.SecurityUtil;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -43,5 +45,11 @@ public class MealsUtil {
 
     public static MealTo createWithExcess(Meal meal, boolean Excess) {
         return new MealTo(meal.getId(), meal.getDateTime(), meal.getDescription(), meal.getCalories(), Excess);
+    }
+
+    public static Map<Integer, MealTo> getMealToMap(List<Meal> meals) {
+        Map<Integer, MealTo> map = new HashMap<>();
+        getWithExcess(meals, SecurityUtil.authUserCaloriesPerDay()).forEach(mealTo -> map.put(mealTo.getId(), mealTo));
+        return map;
     }
 }

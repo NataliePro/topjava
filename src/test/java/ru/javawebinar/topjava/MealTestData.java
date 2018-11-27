@@ -6,6 +6,7 @@ import java.time.Month;
 import java.util.List;
 
 import static java.time.LocalDateTime.of;
+import static org.assertj.core.api.Assertions.assertThat;
 import static ru.javawebinar.topjava.model.AbstractBaseEntity.START_SEQ;
 
 public class MealTestData {
@@ -29,5 +30,17 @@ public class MealTestData {
 
     public static Meal getUpdated() {
         return new Meal(MEAL1_ID, MEAL1.getDateTime(), "Обновленный завтрак", 200);
+    }
+
+    public static void assertMatch(Meal actual, Meal expected) {
+        assertThat(actual).isEqualToIgnoringGivenFields(expected, "user");
+    }
+
+    public static void assertMatch(Iterable<Meal> actual, Meal... expected) {
+        assertMatch(actual, List.of(expected));
+    }
+
+    public static void assertMatch(Iterable<Meal> actual, Iterable<Meal> expected) {
+        assertThat(actual).usingElementComparatorIgnoringFields("user").isEqualTo(expected);
     }
 }

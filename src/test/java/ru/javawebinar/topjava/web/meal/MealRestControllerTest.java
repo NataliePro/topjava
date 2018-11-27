@@ -17,9 +17,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ru.javawebinar.topjava.MealTestData.*;
-import static ru.javawebinar.topjava.TestUtil.*;
+import static ru.javawebinar.topjava.TestUtil.contentJson;
+import static ru.javawebinar.topjava.TestUtil.readFromJson;
 import static ru.javawebinar.topjava.UserTestData.USER;
 import static ru.javawebinar.topjava.UserTestData.USER_ID;
+import static ru.javawebinar.topjava.util.MealsUtil.createWithExcess;
+import static ru.javawebinar.topjava.util.MealsUtil.getWithExcess;
+import static ru.javawebinar.topjava.web.SecurityUtil.authUserCaloriesPerDay;
 
 class MealRestControllerTest extends AbstractControllerTest {
 
@@ -34,7 +38,7 @@ class MealRestControllerTest extends AbstractControllerTest {
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(contentJson(MEAL1, "user"));
+                .andExpect(contentJson(MEAL1));
     }
 
     @Test
@@ -43,7 +47,7 @@ class MealRestControllerTest extends AbstractControllerTest {
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(contentJson(List.of(MEAL6, MEAL5, MEAL4, MEAL3, MEAL2, MEAL1), "user"));
+                .andExpect(contentJson(getWithExcess(MEALS, authUserCaloriesPerDay())));
     }
 
     @Test
@@ -56,8 +60,8 @@ class MealRestControllerTest extends AbstractControllerTest {
                 .andExpect(status().isCreated());
         Meal returned = readFromJson(action, Meal.class);
         expected.setId(returned.getId());
-        assertMatch(returned, expected, "user");
-        assertMatch(mealService.getAll(USER_ID), List.of(expected, MEAL6, MEAL5, MEAL4, MEAL3, MEAL2, MEAL1), "user");
+        assertMatch(returned, expected);
+        assertMatch(mealService.getAll(USER_ID), List.of(expected, MEAL6, MEAL5, MEAL4, MEAL3, MEAL2, MEAL1));
     }
 
     @Test
@@ -65,7 +69,7 @@ class MealRestControllerTest extends AbstractControllerTest {
         mockMvc.perform(delete(REST_URL + MEAL1_ID))
                 .andExpect(status().isNoContent())
                 .andDo(print());
-        assertMatch(mealService.getAll(USER_ID), List.of(MEAL6, MEAL5, MEAL4, MEAL3, MEAL2), "user");
+        assertMatch(mealService.getAll(USER_ID), List.of(MEAL6, MEAL5, MEAL4, MEAL3, MEAL2));
     }
 
     @Test
@@ -77,17 +81,17 @@ class MealRestControllerTest extends AbstractControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(JsonUtil.writeValue(updated)))
                 .andExpect(status().isNoContent());
-        assertMatch(mealService.get(MEAL1_ID, USER_ID), updated, "user");
+        assertMatch(mealService.get(MEAL1_ID, USER_ID), updated);
     }
 
     @Test
     void testGetBetweenOneDate() throws Exception {
         mockMvc.perform(get(REST_URL + "filter")
-                .param("startDate", "2015-05-30"))
+                .param("startDate", "2015-05-31"))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(contentJson(List.of(MEAL6, MEAL5, MEAL4, MEAL3, MEAL2, MEAL1), "user"));
+                .andExpect(contentJson(List.of(createWithExcess(MEAL6, true), createWithExcess(MEAL5, true), createWithExcess(MEAL4, true))));
 
     }
 
@@ -98,21 +102,21 @@ class MealRestControllerTest extends AbstractControllerTest {
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(contentJson(List.of(MEAL6, MEAL3), "user"));
+                .andExpect(contentJson(List.of(createWithExcess(MEAL6, true), createWithExcess(MEAL3, false))));
 
     }
 
     @Test
     void testGetBetween() throws Exception {
         mockMvc.perform(get(REST_URL + "filter")
-                .param("startDate", "2015-05-30")
-                .param("startTime", "13:00")
+                .param("startDate", "2015-05-31")
+                .param("startTime", "09:00")
                 .param("endDate", "2015-05-31")
                 .param("endTime", "23:00"))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(contentJson(List.of(MEAL6, MEAL5, MEAL3, MEAL2), "user"));
+                .andExpect(contentJson(List.of(createWithExcess(MEAL6, true), createWithExcess(MEAL5, true), createWithExcess(MEAL4, true))));
 
     }
 }
