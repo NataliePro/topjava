@@ -1,11 +1,10 @@
 package ru.javawebinar.topjava.web;
 
+import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
-import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.to.MealTo;
-import ru.javawebinar.topjava.web.json.JsonUtil;
 
 import java.util.List;
 
@@ -38,54 +37,44 @@ class RootControllerTest extends AbstractControllerTest {
 
     @Test
     void testMeals() throws Exception {
-        String json = JsonUtil.writeValue(MEALS);
-        List<Meal> meals = JsonUtil.readValues(json, Meal.class);
-
         mockMvc.perform(get("/meals"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(view().name("meals"))
                 .andExpect(forwardedUrl("/WEB-INF/jsp/meals.jsp"))
                 .andExpect(model().attribute("meals", hasSize(6)))
-                .andExpect(model().attribute("meals", getMealToMatcher(MEALS)));
+                .andExpect(model().attribute("meals", new MealToMatcher(MEALS)));
     }
 
-    public Matcher<List<MealTo>> getMealToMatcher(List<Meal> meals) {
-        List<MealTo> expected = getWithExcess(meals, SecurityUtil.authUserCaloriesPerDay());
-        return new Matcher<>() {
-            @Override
-            public void describeTo(Description description) {
+    private class MealToMatcher extends BaseMatcher<MealTo> {
 
+        private List<MealTo> expected;
+
+        public MealToMatcher(List<Meal> meals) {
+            this.expected = getWithExcess(meals, SecurityUtil.authUserCaloriesPerDay());
+        }
+
+        @Override
+        public boolean matches(Object item) {
+            List<MealTo> actual = ((List<MealTo>) item);
+            if (expected.size() != actual.size()) {
+                return false;
             }
-
-            @Override
-            public boolean matches(Object item) {
-                List<MealTo> actual = ((List<MealTo>) item);
-                if (expected.size() != actual.size()) {
+            for (int i = 0; i < actual.size(); i++) {
+                if (!actual.get(i).getDescription().equals(expected.get(i).getDescription())
+                        || actual.get(i).getCalories() != expected.get(i).getCalories()
+                        || !actual.get(i).getDateTime().equals(expected.get(i).getDateTime())
+                        || actual.get(i).isExcess() != expected.get(i).isExcess()) {
                     return false;
                 }
-                boolean isEqual = true;
-                for (int i = 0; i < actual.size(); i++) {
-                    if (!actual.get(i).getDescription().equals(expected.get(i).getDescription())
-                            || actual.get(i).getCalories() != expected.get(i).getCalories()
-                            || !actual.get(i).getDateTime().equals(expected.get(i).getDateTime())
-                            || actual.get(i).isExcess() != expected.get(i).isExcess()) {
-                        isEqual = false;
-                        break;
-                    }
-                }
-                return isEqual;
             }
+            return true;
+        }
 
-            @Override
-            public void describeMismatch(Object item, Description mismatchDescription) {
-                mismatchDescription.appendText("MEALS is not equal");
-            }
-
-            @Override
-            public void _dont_implement_Matcher___instead_extend_BaseMatcher_() {
-
-            }
-        };
+        @Override
+        public void describeTo(Description description) {
+            description.appendText("MEALS is not equal");
+        }
     }
+
 }

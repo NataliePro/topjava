@@ -1,5 +1,6 @@
 package ru.javawebinar.topjava;
 
+import org.springframework.test.web.servlet.ResultMatcher;
 import ru.javawebinar.topjava.model.Role;
 import ru.javawebinar.topjava.model.User;
 
@@ -25,5 +26,13 @@ public class UserTestData {
 
     public static void assertMatch(Iterable<User> actual, Iterable<User> expected) {
         assertThat(actual).usingElementComparatorIgnoringFields("registered", "meals").isEqualTo(expected);
+    }
+
+    public static ResultMatcher contentJson(User... expected) {
+        return TestUtil.contentJson(List.of(expected), "registered");
+    }
+
+    public static ResultMatcher contentJson(User expected) {
+        return TestUtil.contentJson(expected, "registered");
     }
 }
