@@ -43,38 +43,7 @@ class RootControllerTest extends AbstractControllerTest {
                 .andExpect(view().name("meals"))
                 .andExpect(forwardedUrl("/WEB-INF/jsp/meals.jsp"))
                 .andExpect(model().attribute("meals", hasSize(6)))
-                .andExpect(model().attribute("meals", new MealToMatcher(MEALS)));
-    }
-
-    private class MealToMatcher extends BaseMatcher<MealTo> {
-
-        private List<MealTo> expected;
-
-        public MealToMatcher(List<Meal> meals) {
-            this.expected = getWithExcess(meals, SecurityUtil.authUserCaloriesPerDay());
-        }
-
-        @Override
-        public boolean matches(Object item) {
-            List<MealTo> actual = ((List<MealTo>) item);
-            if (expected.size() != actual.size()) {
-                return false;
-            }
-            for (int i = 0; i < actual.size(); i++) {
-                if (!actual.get(i).getDescription().equals(expected.get(i).getDescription())
-                        || actual.get(i).getCalories() != expected.get(i).getCalories()
-                        || !actual.get(i).getDateTime().equals(expected.get(i).getDateTime())
-                        || actual.get(i).isExcess() != expected.get(i).isExcess()) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        @Override
-        public void describeTo(Description description) {
-            description.appendText("MEALS is not equal");
-        }
+                .andExpect(model().attribute("meals", getWithExcess(MEALS, SecurityUtil.authUserCaloriesPerDay())));
     }
 
 }
