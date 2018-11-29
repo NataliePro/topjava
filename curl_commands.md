@@ -17,7 +17,6 @@ curl -H "Content-Type: application/json" -X POST -d "{\"dateTime\":\"2018-11-13T
 
 <li><b>Filter meal:</b><br>
 curl "http://localhost:8080/topjava/rest/meals/filter?startDate=2015-05-31&startTime=20:00&endDate=2015-06-01&endTime=23:00"</li>
-</ul>
 
 <li><b>Admin: get all users:</b><br>
 curl "http://localhost:8080/topjava/rest/admin/users"</li>
@@ -45,3 +44,4 @@ curl "http://localhost:8080/topjava/rest/profile"</li>
 
 <li><b>Profile: update user:</b><br>
 curl -H "Content-Type: application/json" -X PUT -d "{\"name\": \"Update user\",\"email\": \"update@yandex.ru\",\"password\": \"passwordUpdate\",\"roles\": [\"ROLE_USER\"]}" http://localhost:8080/topjava/rest/profile</li>
+</ul>
