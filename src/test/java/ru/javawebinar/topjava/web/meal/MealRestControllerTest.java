@@ -23,7 +23,6 @@ import static ru.javawebinar.topjava.UserTestData.USER;
 import static ru.javawebinar.topjava.UserTestData.USER_ID;
 import static ru.javawebinar.topjava.util.MealsUtil.createWithExcess;
 import static ru.javawebinar.topjava.util.MealsUtil.getWithExcess;
-import static ru.javawebinar.topjava.web.SecurityUtil.authUserCaloriesPerDay;
 
 class MealRestControllerTest extends AbstractControllerTest {
 
@@ -47,7 +46,7 @@ class MealRestControllerTest extends AbstractControllerTest {
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(contentJson(getWithExcess(MEALS, authUserCaloriesPerDay())));
+                .andExpect(contentJson(getWithExcess(MEALS, CALORIES_PER_DAY)));
     }
 
     @Test
