@@ -31,15 +31,16 @@
             </thead>
             <c:forEach items="${users}" var="user">
                 <jsp:useBean id="user" type="ru.javawebinar.topjava.model.User"/>
-                <tr>
+                <tr data-enabled="${user.enabled}">
                     <td><c:out value="${user.name}"/></td>
                     <td><a href="mailto:${user.email}">${user.email}</a></td>
                     <td>${user.roles}</td>
                     <td><input type="checkbox"
-                               <c:if test="${user.enabled}">checked</c:if> id="${user.id}"/></td>
+                               <c:if test="${user.enabled}">checked</c:if> onchange="setEnabled(${user.id},checked)"/>
+                    </td>
                     <td><fmt:formatDate value="${user.registered}" pattern="dd-MMMM-yyyy"/></td>
                     <td><a><span class="fa fa-pencil"></span></a></td>
-                    <td><a class="delete" id="${user.id}"><span class="fa fa-remove"></span></a></td>
+                    <td><a class="delete" onclick="deleteRow(${user.id})"><span class="fa fa-remove"></span></a></td>
                 </tr>
             </c:forEach>
         </table>

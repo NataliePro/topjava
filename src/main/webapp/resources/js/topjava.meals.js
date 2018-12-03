@@ -1,21 +1,17 @@
-const ajaxUrl = "ajax/admin/users/";
+const ajaxUrl = "ajax/profile/meals/";
 let datatableApi;
-
-function setEnabled(id, enabled) {
-    $.ajax({
-        type: "PUT",
-        url: ajaxUrl + id + "?enabled=" + enabled,
-    }).done(function () {
-        updateTable();
-        successNoty("Updated");
-    });
-}
 
 function updateTable() {
     $.ajax({
         type: "GET",
-        url: ajaxUrl,
+        url: ajaxUrl + "filter",
+        data: $("#filter").serialize()
     }).done(drawTable);
+}
+
+function clearFilter() {
+    $("#filter")[0].reset();
+    $.get(ajaxUrl, drawTable);
 }
 
 // $(document).ready(function () {
@@ -25,19 +21,13 @@ $(function () {
         "info": true,
         "columns": [
             {
-                "data": "name"
+                "data": "dateTime"
             },
             {
-                "data": "email"
+                "data": "description"
             },
             {
-                "data": "roles"
-            },
-            {
-                "data": "enabled"
-            },
-            {
-                "data": "registered"
+                "data": "calories"
             },
             {
                 "defaultContent": "Edit",
@@ -51,7 +41,7 @@ $(function () {
         "order": [
             [
                 0,
-                "asc"
+                "desc"
             ]
         ]
     });

@@ -1,8 +1,4 @@
 function makeEditable() {
-    $(".delete").click(function () {
-        deleteRow($(this).attr("id"));
-    });
-
     $(document).ajaxError(function (event, jqXHR, options, jsExc) {
         failNoty(jqXHR);
     });
@@ -26,10 +22,8 @@ function deleteRow(id) {
     });
 }
 
-function updateTable() {
-    $.get(ajaxUrl, function (data) {
-        datatableApi.clear().rows.add(data).draw();
-    });
+function drawTable(data) {
+    datatableApi.clear().rows.add(data).draw();
 }
 
 function save() {
