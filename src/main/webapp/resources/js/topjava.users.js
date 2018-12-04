@@ -6,8 +6,9 @@ function setEnabled(id, enabled) {
         type: "PUT",
         url: ajaxUrl + id + "?enabled=" + enabled,
     }).done(function () {
-        updateTable();
-        successNoty("Updated");
+        let color = enabled ? "green" : "gray";
+        $('tr[id=' + id + ']').css("color", color);
+        successNoty(enabled ? "Enabled" : "Disabled");
     });
 }
 
