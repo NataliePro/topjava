@@ -9,7 +9,7 @@ function setEnabled(id, enabled) {
         let color = enabled ? "green" : "gray";
         $('tr[id=' + id + ']').css("color", color);
         successNoty(enabled ? "Enabled" : "Disabled");
-    });
+    }).fail(failNoty("Failed to set "+ (enabled ? "enabled" : "disabled")));
 }
 
 function updateTable() {
