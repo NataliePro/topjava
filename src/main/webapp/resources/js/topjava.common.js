@@ -1,4 +1,5 @@
 let context, form;
+const i18n = [];
 
 function makeEditable(ctx) {
     context = ctx;
@@ -21,6 +22,10 @@ function updateRow(id) {
     $("#modalTitle").html(i18n["editTitle"]);
     $.get(context.ajaxUrl + id, function (data) {
         $.each(data, function (key, value) {
+            if (key=="dateTime"){
+                let valFormat = value.replace("T"," ");
+                value = valFormat.substring(0,16);
+            }
             form.find("input[name='" + key + "']").val(value);
         });
         $('#editRow').modal();
@@ -91,4 +96,23 @@ function renderDeleteBtn(data, type, row) {
     if (type === "display") {
         return "<a onclick='deleteRow(" + row.id + ");'><span class='fa fa-remove'></span></a>";
     }
+}
+
+function init_i18n(prfx) {
+    [(prfx+".add"),(prfx+".edit"),"common.deleted","common.saved","common.enabled","common.disabled","common.errorStatus"].forEach(function (key) {
+        $.ajax({
+            url: "/topjava/i18n",
+            type: "GET",
+            data: "key=" + key
+        }).done(function (data) {
+            if(key.includes(".edit")){
+                key = "editTitle";
+            }else if (key.includes(".add")){
+                key = "addTitle";
+            };
+            i18n[key] = data;
+        }).fail(function () {
+            i18n[key] = "";
+        });
+    });
 }

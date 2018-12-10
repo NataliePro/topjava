@@ -42,4 +42,15 @@ public class MealsUtil {
     public static MealTo createWithExcess(Meal meal, boolean Excess) {
         return new MealTo(meal.getId(), meal.getDateTime(), meal.getDescription(), meal.getCalories(), Excess);
     }
+
+    public static Meal createNewFromTo(MealTo newMeal) {
+        return new Meal(null, newMeal.getDateTime(), newMeal.getDescription(), newMeal.getCalories());
+    }
+
+    public static Meal updateFromTo(Meal meal, MealTo mealTo) {
+        meal.setDateTime(mealTo.getDateTime());
+        meal.setCalories(mealTo.getCalories());
+        meal.setDescription(mealTo.getDescription());
+        return meal;
+    }
 }

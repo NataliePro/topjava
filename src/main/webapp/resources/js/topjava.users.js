@@ -15,6 +15,7 @@ function enable(chkbox, id) {
     });
 }
 
+
 // $(document).ready(function () {
 $(function () {
     makeEditable({
@@ -88,4 +89,5 @@ $(function () {
             }
         }
     );
+    init_i18n("user");
 });
