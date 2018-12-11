@@ -261,7 +261,7 @@
         <dependency>
             <groupId>org.webjars.bower</groupId>
             <artifactId>datetimepicker</artifactId>
-            <version>${webjars-datetimepicker.version}</version>
+            <version>2.5.20</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.webjars.bower</groupId>

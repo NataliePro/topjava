@@ -33,7 +33,7 @@ $(function () {
                     },
                     {
                         "data": "email",
-                        "render": function (data, type, row) {
+                        "render": function (data, type) {
                             if (type === "display") {
                                 return "<a href='mailto:" + data + "'>" + data + "</a>";
                             }
@@ -54,7 +54,7 @@ $(function () {
                     },
                     {
                         "data": "registered",
-                        "render": function (date, type, row) {
+                        "render": function (date, type) {
                             if (type === "display") {
                                 return date.substring(0, 10);
                             }
@@ -78,7 +78,7 @@ $(function () {
                         "asc"
                     ]
                 ],
-                "createdRow": function (row, data, dataIndex) {
+                "createdRow": function (row, data) {
                     if (!data.enabled) {
                         $(row).attr("data-userEnabled", false);
                     }
@@ -89,5 +89,4 @@ $(function () {
             }
         }
     );
-    init_i18n("user");
 });

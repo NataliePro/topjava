@@ -25,7 +25,7 @@ $(function () {
             "columns": [
                 {
                     "data": "dateTime",
-                    "render": function (date, type, row) {
+                    "render": function (date, type) {
                         if (type === "display") {
                             return date.substring(0, 10)+" "+date.substring(11,16);
                         }
@@ -55,40 +55,30 @@ $(function () {
                     "desc"
                 ]
             ],
-            "createdRow": function (row, data, dataIndex) {
+            "createdRow": function (row, data) {
                 $(row).attr("data-mealExcess", data.excess);
             }
         }),
         updateTable: updateFilteredTable
     });
-    init_i18n("meal");
-    $('#dateTime').datetimepicker(
-         {
-             format:'Y-m-d H:i'
-         });
-    $('#startDate').datetimepicker(
-        {
-            timepicker:false,
-            format:'Y-m-d'
-        }
-    );
-    $('#endDate').datetimepicker(
-        {
-            timepicker:false,
-            format:'Y-m-d'
-        }
-    );
-    $('#startTime').datetimepicker(
-        {
-            datepicker:false,
-            format:'H:i'
-        }
-    );
-    $('#endTime').datetimepicker(
-        {
-            datepicker:false,
-            format:'H:i'
-        }
-    );
-
+   setDatetimepickers();
 });
+
+function setDatetimepickers() {
+    $('#dateTime').datetimepicker(
+        {
+            format:'Y-m-d H:i'
+        });
+    $('#startDate,#endDate').datetimepicker(
+        {
+            timepicker:false,
+            format:'Y-m-d'
+        }
+    );
+    $('#startTime,#endTime').datetimepicker(
+        {
+            datepicker:false,
+            format:'H:i'
+        }
+    );
+}
