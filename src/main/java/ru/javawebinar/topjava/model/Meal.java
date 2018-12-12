@@ -8,6 +8,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import javax.validation.groups.Default;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -29,22 +30,22 @@ public class Meal extends AbstractBaseEntity {
     public static final String GET_BETWEEN = "Meal.getBetween";
 
     @Column(name = "date_time", nullable = false)
-    @NotNull(groups = {ValidationForAjax.class})
+    @NotNull(groups = {ValidationForAjax.class, Default.class})
     private LocalDateTime dateTime;
 
     @Column(name = "description", nullable = false)
-    @NotBlank(groups = {ValidationForAjax.class})
-    @Size(min = 2, max = 120)
+    @NotBlank(groups = {ValidationForAjax.class, Default.class})
+    @Size(min = 2, max = 120, groups = {ValidationForAjax.class, Default.class})
     private String description;
 
     @Column(name = "calories", nullable = false)
-    @Range(min = 10, max = 5000, groups = {ValidationForAjax.class})
+    @Range(min = 10, max = 5000, groups = {ValidationForAjax.class, Default.class}, message = "calories must be between 10 and 5000")
     private Integer calories;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @NotNull
+    @NotNull(groups = {Default.class})
     private User user;
 
     public Meal() {
@@ -59,10 +60,6 @@ public class Meal extends AbstractBaseEntity {
         this.dateTime = dateTime;
         this.description = description;
         this.calories = calories;
-    }
-
-    public interface ValidationForAjax {
-        // validation group marker interface
     }
 
     public LocalDateTime getDateTime() {
@@ -113,5 +110,9 @@ public class Meal extends AbstractBaseEntity {
                 ", description='" + description + '\'' +
                 ", calories=" + calories +
                 '}';
+    }
+
+    public interface ValidationForAjax {
+        // validation group marker interface
     }
 }

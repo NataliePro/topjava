@@ -110,8 +110,8 @@
     </div>
 </div>
 <jsp:include page="fragments/footer.jsp"/>
-</body>
 <jsp:include page="fragments/i18n.jsp">
     <jsp:param name="prfx" value="meal"/>
 </jsp:include>
+</body>
 </html>

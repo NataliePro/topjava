@@ -17,13 +17,16 @@ function add() {
     $("#editRow").modal();
 }
 
+function formatDate(date) {
+    return date.substring(0, 10)+" "+date.substring(11,16);
+}
+
 function updateRow(id) {
     $("#modalTitle").html(i18n["editTitle"]);
     $.get(context.ajaxUrl + id, function (data) {
         $.each(data, function (key, value) {
             if (key=="dateTime"){
-                let valFormat = value.replace("T"," ");
-                value = valFormat.substring(0,16);
+                value = formatDate(value);
             }
             form.find("input[name='" + key + "']").val(value);
         });
