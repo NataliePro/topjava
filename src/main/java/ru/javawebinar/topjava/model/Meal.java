@@ -40,6 +40,7 @@ public class Meal extends AbstractBaseEntity {
 
     @Column(name = "calories", nullable = false)
     @Range(min = 10, max = 5000, groups = {ValidationForAjax.class, Default.class}, message = "calories must be between 10 and 5000")
+    @NotNull(groups = {ValidationForAjax.class, Default.class}, message = "calories must not be null")
     private Integer calories;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -90,7 +91,7 @@ public class Meal extends AbstractBaseEntity {
         this.description = description;
     }
 
-    public void setCalories(int calories) {
+    public void setCalories(Integer calories) {
         this.calories = calories;
     }
 
