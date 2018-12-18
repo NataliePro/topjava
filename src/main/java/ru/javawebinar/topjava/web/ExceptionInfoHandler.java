@@ -7,6 +7,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,12 +20,13 @@ import ru.javawebinar.topjava.util.exception.IllegalRequestDataException;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Locale;
 
 import static ru.javawebinar.topjava.util.exception.ErrorType.*;
 
 @RestControllerAdvice(annotations = RestController.class)
 @Order(Ordered.HIGHEST_PRECEDENCE + 5)
-public class ExceptionInfoHandler {
+public class ExceptionInfoHandler extends AbstractExceptionHandler {
     private static Logger log = LoggerFactory.getLogger(ExceptionInfoHandler.class);
 
     //  http://stackoverflow.com/a/22358422/548473
@@ -36,8 +38,14 @@ public class ExceptionInfoHandler {
 
     @ResponseStatus(value = HttpStatus.CONFLICT)  // 409
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ErrorInfo conflict(HttpServletRequest req, DataIntegrityViolationException e) {
-        return logAndGetErrorInfo(req, e, true, DATA_ERROR);
+    public ErrorInfo conflict(HttpServletRequest req, DataIntegrityViolationException e, Locale locale) {
+        return logAndGetErrorInfoWithMessage(req, e, true, DATA_ERROR, getExceptionMessage(e, locale));
+    }
+
+    @ResponseStatus(value = HttpStatus.UNPROCESSABLE_ENTITY)  // 422
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ErrorInfo restValidation(HttpServletRequest req, Exception e, MethodArgumentNotValidException error) {
+        return logAndGetErrorInfoWithMessage(req, e, true, VALIDATION_ERROR, ValidationUtil.getErrorMessageFromBidingResult(error.getBindingResult()));
     }
 
     @ResponseStatus(value = HttpStatus.UNPROCESSABLE_ENTITY)  // 422
@@ -52,14 +60,20 @@ public class ExceptionInfoHandler {
         return logAndGetErrorInfo(req, e, true, APP_ERROR);
     }
 
-//    https://stackoverflow.com/questions/538870/should-private-helper-methods-be-static-if-they-can-be-static
-    private static ErrorInfo logAndGetErrorInfo(HttpServletRequest req, Exception e, boolean logException, ErrorType errorType) {
+    //    https://stackoverflow.com/questions/538870/should-private-helper-methods-be-static-if-they-can-be-static
+    private static ErrorInfo logAndGetErrorInfo(HttpServletRequest req, Exception e, boolean logException, ErrorType errorType
+    ) {
+        return logAndGetErrorInfoWithMessage(req, e, logException, errorType, null);
+    }
+
+    private static ErrorInfo logAndGetErrorInfoWithMessage(HttpServletRequest req, Exception e, boolean logException, ErrorType errorType, String errorMessage) {
         Throwable rootCause = ValidationUtil.getRootCause(e);
+        String msg = errorMessage != null ? errorMessage : ValidationUtil.getMessage(rootCause);
         if (logException) {
             log.error(errorType + " at request " + req.getRequestURL(), rootCause);
         } else {
             log.warn("{} at request  {}: {}", errorType, req.getRequestURL(), rootCause.toString());
         }
-        return new ErrorInfo(req.getRequestURL(), errorType, ValidationUtil.getMessage(rootCause));
+        return new ErrorInfo(req.getRequestURL(), errorType, msg);
     }
 }

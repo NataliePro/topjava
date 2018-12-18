@@ -20,6 +20,7 @@ public class ModelInterceptor extends HandlerInterceptorAdapter {
             if (authorizedUser != null) {
                 modelAndView.getModelMap().addAttribute("userTo", authorizedUser.getUserTo());
             }
+            modelAndView.addObject("viewName", modelAndView.getViewName());
         }
     }
 }
