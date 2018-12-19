@@ -7,6 +7,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -46,6 +47,12 @@ public class ExceptionInfoHandler extends AbstractExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ErrorInfo restValidation(HttpServletRequest req, Exception e, MethodArgumentNotValidException error) {
         return logAndGetErrorInfoWithMessage(req, e, true, VALIDATION_ERROR, ValidationUtil.getErrorMessageFromBidingResult(error.getBindingResult()));
+    }
+
+    @ResponseStatus(value = HttpStatus.UNPROCESSABLE_ENTITY)  // 422
+    @ExceptionHandler(BindException.class)
+    public ErrorInfo bindingException(HttpServletRequest req, BindException e) {
+        return logAndGetErrorInfoWithMessage(req, e, true, VALIDATION_ERROR, ValidationUtil.getErrorMessageFromBidingResult(e.getBindingResult()));
     }
 
     @ResponseStatus(value = HttpStatus.UNPROCESSABLE_ENTITY)  // 422

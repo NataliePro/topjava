@@ -1,11 +1,12 @@
 package ru.javawebinar.topjava.util;
 
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import ru.javawebinar.topjava.HasId;
 import ru.javawebinar.topjava.util.exception.IllegalRequestDataException;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
-import java.util.StringJoiner;
+import java.util.List;
 
 public class ValidationUtil {
 
@@ -58,18 +59,18 @@ public class ValidationUtil {
     }
 
     public static String getErrorMessageFromBidingResult(BindingResult result) {
-        StringJoiner joiner = new StringJoiner("<br>");
-        result.getFieldErrors().forEach(
-                fe -> {
-                    String msg = fe.getDefaultMessage();
-                    if (msg != null) {
-                        if (!msg.startsWith(fe.getField())) {
-                            msg = fe.getField() + ' ' + msg;
-                        }
-                        joiner.add(msg);
-                    }
-                });
-        return joiner.toString();
+        List<FieldError> fieldErrors = result.getFieldErrors();
+        if (fieldErrors.size() > 0) {
+            FieldError error = fieldErrors.get(0);
+            String msg = error.getDefaultMessage();
+            if (msg != null) {
+                if (!msg.startsWith(error.getField())) {
+                    msg = error.getField() + ' ' + msg;
+                }
+            }
+            return msg;
+        }
+        return null;
     }
 
     public static String getMessage(Throwable e) {

@@ -1,6 +1,8 @@
 package ru.javawebinar.topjava.web.user;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Propagation;
@@ -11,6 +13,7 @@ import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.web.AbstractControllerTest;
 
 import java.util.Collections;
+import java.util.Locale;
 
 import static org.hamcrest.core.StringContains.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -24,6 +27,8 @@ import static ru.javawebinar.topjava.UserTestData.*;
 class AdminRestControllerTest extends AbstractControllerTest {
 
     private static final String REST_URL = AdminRestController.REST_URL + '/';
+    @Autowired
+    private MessageSource messageSource;
 
     @Test
     void testGet() throws Exception {
@@ -113,6 +118,21 @@ class AdminRestControllerTest extends AbstractControllerTest {
 
     }
 
+    @Transactional(propagation = Propagation.NEVER)
+    @Test
+    void testValidationDuplicatedEmailUpdate() throws Exception {
+        User updated = new User(USER);
+        updated.setEmail("admin@gmail.com");
+        updated.setRoles(Collections.singletonList(Role.ROLE_ADMIN));
+        mockMvc.perform(put(REST_URL + USER_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(userHttpBasic(ADMIN))
+                .content(jsonWithPassword(updated, "sdfsdfs")))
+                .andDo(print())
+                .andExpect(status().isConflict())
+                .andExpect(content().string(containsString(messageSource.getMessage("user.duplicatedEmail", null, Locale.getDefault()))));
+    }
+
     @Test
     void testCreate() throws Exception {
         User expected = new User(null, "New", "new@gmail.com", "newPass", 2300, Role.ROLE_USER, Role.ROLE_ADMIN);
@@ -142,7 +162,7 @@ class AdminRestControllerTest extends AbstractControllerTest {
 
     @Transactional(propagation = Propagation.NEVER)
     @Test
-    void testValidationDuplicatedEmail() throws Exception {
+    void testValidationDuplicatedEmailCreate() throws Exception {
         User expected = new User(null, "Nnn", "admin@gmail.com", "", 2000, Role.ROLE_USER, Role.ROLE_ADMIN);
         mockMvc.perform(post(REST_URL)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -150,7 +170,7 @@ class AdminRestControllerTest extends AbstractControllerTest {
                 .content(jsonWithPassword(expected, "newPass")))
                 .andDo(print())
                 .andExpect(status().isConflict())
-                .andExpect(content().string(containsString("User with same email already exist")));
+                .andExpect(content().string(containsString(messageSource.getMessage("user.duplicatedEmail", null, Locale.getDefault()))));
     }
 
     @Test

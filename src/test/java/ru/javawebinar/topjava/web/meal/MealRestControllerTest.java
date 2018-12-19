@@ -3,6 +3,7 @@ package ru.javawebinar.topjava.web.meal;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Propagation;
@@ -11,6 +12,8 @@ import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.service.MealService;
 import ru.javawebinar.topjava.web.AbstractControllerTest;
 import ru.javawebinar.topjava.web.json.JsonUtil;
+
+import java.util.Locale;
 
 import static org.hamcrest.core.StringContains.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -31,6 +34,9 @@ class MealRestControllerTest extends AbstractControllerTest {
 
     @Autowired
     private MealService service;
+
+    @Autowired
+    private MessageSource messageSource;
 
     @Test
     void testGet() throws Exception {
@@ -131,7 +137,22 @@ class MealRestControllerTest extends AbstractControllerTest {
 
     @Transactional(propagation = Propagation.NEVER)
     @Test
-    void testValidationDuplicatedDateTime() throws Exception {
+    void testValidationDuplicatedDateTimeCreate() throws Exception {
+        Meal created = getCreated();
+        created.setDateTime(MEAL1.getDateTime());
+        mockMvc.perform(post(REST_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(JsonUtil.writeValue(created))
+                .with(userHttpBasic(USER)))
+                .andDo(print())
+                .andExpect(status().isConflict())
+                .andExpect(content().string(containsString(messageSource.getMessage("meal.duplicatedDateTime", null, Locale.getDefault()))));
+
+    }
+
+    @Transactional(propagation = Propagation.NEVER)
+    @Test
+    void testValidationDuplicatedDateTimeUpdate() throws Exception {
         Meal updated = getUpdated();
         updated.setDateTime(MEAL2.getDateTime());
         mockMvc.perform(put(REST_URL + MEAL1_ID)
@@ -140,7 +161,7 @@ class MealRestControllerTest extends AbstractControllerTest {
                 .with(userHttpBasic(USER)))
                 .andDo(print())
                 .andExpect(status().isConflict())
-                .andExpect(content().string(containsString("You already have meal with same date/time")));
+                .andExpect(content().string(containsString(messageSource.getMessage("meal.duplicatedDateTime", null, Locale.getDefault()))));
     }
 
     @Test

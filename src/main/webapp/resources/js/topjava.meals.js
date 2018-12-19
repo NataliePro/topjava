@@ -63,8 +63,8 @@ $(function () {
         },
         updateTable: updateFilteredTable
     });
-
-//  http://xdsoft.net/jqplugins/datetimepicker/
+    //  http://xdsoft.net/jqplugins/datetimepicker/
+    jQuery.datetimepicker.setLocale(loc);
     const startDate = $('#startDate');
     const endDate = $('#endDate');
     startDate.datetimepicker({
@@ -96,7 +96,7 @@ $(function () {
         onShow: function (ct) {
             this.setOptions({
                 maxTime: endTime.val() ? endTime.val() : false
-            })
+            });
         }
     });
     endTime.datetimepicker({
