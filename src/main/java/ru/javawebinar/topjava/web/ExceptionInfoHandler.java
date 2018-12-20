@@ -2,6 +2,8 @@ package ru.javawebinar.topjava.web;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.ModelAndView;
 import ru.javawebinar.topjava.util.ValidationUtil;
 import ru.javawebinar.topjava.util.exception.ErrorInfo;
 import ru.javawebinar.topjava.util.exception.ErrorType;
@@ -23,12 +26,27 @@ import ru.javawebinar.topjava.util.exception.NotFoundException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Locale;
 
+import static ru.javawebinar.topjava.util.Util.setExceptionModelAndViewWithMessage;
 import static ru.javawebinar.topjava.util.exception.ErrorType.*;
 
 @RestControllerAdvice(annotations = RestController.class)
 @Order(Ordered.HIGHEST_PRECEDENCE + 5)
-public class ExceptionInfoHandler extends AbstractExceptionHandler {
+public class ExceptionInfoHandler {
     private static Logger log = LoggerFactory.getLogger(ExceptionInfoHandler.class);
+
+    @Autowired
+    private MessageSource messageSource;
+
+    public String getExceptionMessage(Exception e, Locale locale) {
+        Throwable rootCause = ValidationUtil.getRootCause(e);
+        String msg = ValidationUtil.getMessage(rootCause);
+        if (msg.contains("users_unique_email_idx")) {
+            return messageSource.getMessage("user.duplicatedEmail", null, locale);
+        } else if (msg.contains("meals_unique_user_datetime_idx")) {
+            return messageSource.getMessage("meal.duplicatedDateTime", null, locale);
+        }
+        return msg;
+    }
 
     //  http://stackoverflow.com/a/22358422/548473
     @ResponseStatus(value = HttpStatus.UNPROCESSABLE_ENTITY)
@@ -60,6 +78,13 @@ public class ExceptionInfoHandler extends AbstractExceptionHandler {
     public ErrorInfo illegalRequestDataError(HttpServletRequest req, Exception e) {
         return logAndGetErrorInfo(req, e, false, VALIDATION_ERROR);
     }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ModelAndView duplicatedErrorHandler(HttpServletRequest req, Exception e, Locale locale) throws Exception {
+        log.error("Exception at request " + req.getRequestURL(), e);
+        return setExceptionModelAndViewWithMessage(e, getExceptionMessage(e, locale));
+    }
+
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
